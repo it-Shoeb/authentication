@@ -1,0 +1,80 @@
+import userModel from "../models/userModel.js";
+
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+
+export const loginController = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const userExist = await userModel.findOne({ email });
+
+    if (!userExist) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User Not Found" });
+    }
+
+    const isMatched = await bcrypt.compare(password, userExist.password);
+
+    if (!isMatched) {
+      return res
+        .status(209)
+        .json({ success: false, message: "password is invalid" });
+    }
+
+    const token = jwt.sign(
+      { email, _id: userExist._id },
+      process.env.JWT_SECRET
+    );
+
+    res
+      .status(200)
+      .cookie("token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "Strict",
+        maxAge: 3600000,
+        path: "/",
+      })
+      .json({ success: true, message: "User Login Successfull" });
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+export const registerController = async (req, res) => {
+  try {
+    const { username, email, password } = req.body;
+
+    const userExist = await userModel.findOne({ email });
+
+    if (userExist) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Already User Exist" });
+    }
+
+    const genSalt = await bcrypt.genSalt(10);
+    const hash = await bcrypt.hash(password, genSalt);
+    await userModel.create({ username, email, password: hash });
+
+    res
+      .status(200)
+      .json({ success: true, message: "User Register Successfull" });
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+export const logoutController = async (req, res) => {
+  try {
+    res.clearCookie("token");
+    res
+      .status(200)
+      .json({ success: true, message: "User logged out successfully" });
+  } catch (error) {
+    console.error("Logout error:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
