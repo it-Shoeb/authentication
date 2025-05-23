@@ -7,6 +7,8 @@ export const loginController = async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    console.log(req.body);
+
     const userExist = await userModel.findOne({ email });
 
     if (!userExist) {
@@ -33,7 +35,7 @@ export const loginController = async (req, res) => {
       .cookie("token", token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "Strict",
+        sameSite: "lax",
         maxAge: 3600000,
         path: "/",
       })
@@ -54,10 +56,17 @@ export const registerController = async (req, res) => {
         .status(404)
         .json({ success: false, message: "Already User Exist" });
     }
+    console.log(userExist);
 
-    const genSalt = await bcrypt.genSalt(10);
-    const hash = await bcrypt.hash(password, genSalt);
-    await userModel.create({ username, email, password: hash });
+    bcrypt.genSalt(10, (error, salt) => {
+      bcrypt.hash(password, salt, async (error, hash) => {
+        await userModel.create({ username, email, password: hash });
+      });
+    });
+
+    // const salt = await bcrypt.genSalt(10);
+    // const hash = await bcrypt.hash(password, salt);
+    // return console.log(hash);
 
     res
       .status(200)

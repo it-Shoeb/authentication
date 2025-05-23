@@ -6,22 +6,27 @@ import "./App.css";
 import { Routes, Route } from "react-router-dom";
 import Home from "./pages/Home.jsx";
 import Authentication from "./pages/Authentication.jsx";
-import Navbar from "./components/Navbar/MainSection.jsx";
+import Navbar from "./components/layout/Navbar.jsx";
+import LoginForm from "./components/forms/LoginForm.jsx";
+import RegisterationForm from "./components/forms/RegisterationForm.jsx";
+import { AuthContextProvider } from "./context/AuthContextProvider.jsx";
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
 function App() {
   const [count, setCount] = useState(0);
 
   return (
     <>
-      <div className="wrapper h-screen">
+      <AuthContextProvider>
         <Navbar />
-        <div className="inner-wrapper flex flex-col items-center justify-center  min-h-[calc(100vh-56px)]">
-          <Routes>
-            <Route path="/" element={<Authentication />} />
+        <Routes>
+          <Route path="/login" element={<LoginForm />} />
+          <Route path="/register" element={<RegisterationForm />} />
+          <Route element={<ProtectedRoute />}>
             <Route path="/home" element={<Home />} />
-          </Routes>
-        </div>
-      </div>
+          </Route>
+        </Routes>
+      </AuthContextProvider>
     </>
   );
 }
