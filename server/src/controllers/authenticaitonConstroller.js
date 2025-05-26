@@ -2,6 +2,7 @@ import userModel from "../models/userModel.js";
 
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import transporter from "../config/nodemailer.js";
 
 export const loginController = async (req, res) => {
   try {
@@ -85,5 +86,31 @@ export const logoutController = async (req, res) => {
   } catch (error) {
     console.error("Logout error:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+export const sendOTP = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const response = await userModel.findOne({ email });
+
+    if (!response) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User Not Found" });
+    }
+
+    // const info = await transporter.sendMail({
+    //   from: `marjorie.abbott@ethereal.email`,
+    //   to: email,
+    //   subject: "Hello ✔",
+    //   text: "Hello world?", // plain‑text body
+    //   html: "<b>Hello world?</b>", // HTML body
+    // });
+
+    res.status(200).json({ success: true, user: response });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: error });
   }
 };

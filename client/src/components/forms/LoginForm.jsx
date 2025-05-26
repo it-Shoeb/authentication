@@ -1,31 +1,37 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, redirect, replace } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../../services/api";
+import { AuthContext } from "../../context/AuthContextProvider";
 
 export default function LoginForm() {
+  const { setIsAuthenticated, setUser } = useContext(AuthContext);
   const navigate = useNavigate();
-  const [User, setUser] = useState({
+  const [UserLogin, setUserLogin] = useState({
     email: "",
     password: "",
   });
 
   const handleFormData = (e) => {
-    setUser({ ...User, [e.target.name]: e.target.value });
+    setUserLogin({ ...UserLogin, [e.target.name]: e.target.value });
   };
 
   const handleForm = async (e) => {
     e.preventDefault();
 
     try {
-      const response = await api.post("/authentication/login", { ...User });
+      const response = await api.post("/authentication/login", {
+        ...UserLogin,
+      });
       console.log(response);
       if (!response.data.success) {
         toast.error(response.data.message);
       } else {
+        navigate("/home", { replace: true });
+        setIsAuthenticated(true);
+        // setUser(UserLogin);
         toast.success(response.data.message);
-        navigate("/home");
       }
     } catch (error) {
       console.error(error);
@@ -45,7 +51,7 @@ export default function LoginForm() {
           type="text"
           placeholder="Enter Your email"
           name="email"
-          value={User.email}
+          value={UserLogin.email}
           onChange={(e) => {
             handleFormData(e);
           }}
@@ -54,7 +60,7 @@ export default function LoginForm() {
           type="text"
           placeholder="Enter Your password"
           name="password"
-          value={User.password}
+          value={UserLogin.password}
           onChange={(e) => {
             handleFormData(e);
           }}
@@ -65,7 +71,7 @@ export default function LoginForm() {
           <strong className="font-bold text-blue-400">Create account</strong>
         </Link>
 
-        <Link to={"/forget-password"} className="font-bold text-blue-400">
+        <Link to={"/login/checkemail"} className="font-bold text-blue-400">
           Forget Password
         </Link>
       </form>

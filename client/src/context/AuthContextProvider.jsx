@@ -1,6 +1,4 @@
-import React, { createContext, useState, useEffect } from "react";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import React, { createContext, useState, useEffect, useContext } from "react";
 import api from "../services/api";
 
 const AuthContext = createContext();
@@ -8,32 +6,27 @@ const AuthContext = createContext();
 const AuthContextProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+  const [Loading, setLoading] = useState(true);
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
         const response = await api.get("/authentication/authenticate");
-        console.log(response.data.user);
-
         setIsAuthenticated(true);
         setUser(response.data.user);
       } catch (error) {
         console.error(error);
-        // navigate("/login");
-        setUser(null);
-        setIsAuthenticated(false);
       } finally {
         setLoading(false);
       }
     };
-
     checkAuth();
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, loading }}>
+    <AuthContext.Provider
+      value={{ isAuthenticated, setIsAuthenticated, user, setUser, Loading }}
+    >
       {children}
     </AuthContext.Provider>
   );

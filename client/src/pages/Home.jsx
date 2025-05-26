@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
 import api from "../services/api";
-import { AuthContext } from "../context/AuthContextProvider.jsx";
 
 export default function Home() {
   const [User, setUser] = useState([]);
@@ -12,10 +11,8 @@ export default function Home() {
   const fetchUsers = async () => {
     const response = await api.get("/home");
     setUser(response.data.data);
+    console.log(response.data.data);
   };
-
-  const { IsLoggedIn } = useContext(AuthContext);
-  console.log(IsLoggedIn);
 
   return (
     <>

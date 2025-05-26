@@ -4,9 +4,10 @@ import { Navigate, Outlet } from "react-router-dom";
 import { AuthContext } from "../context/AuthContextProvider";
 
 const ProtectedRoute = () => {
-  const { isAuthenticated, loading } = useContext(AuthContext);
+  const { isAuthenticated, Loading } = useContext(AuthContext);
+  console.log("Protected Route " + isAuthenticated, Loading);
 
-  if (loading) {
+  if (Loading) {
     return <div>Loading...</div>;
   }
 
